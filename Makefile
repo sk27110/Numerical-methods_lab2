@@ -1,22 +1,36 @@
 CXX := g++
-CXXFLAGS := -std=c++11 -Wall -Wextra -O3 -I.
+CXXFLAGS := -std=c++17 -Wall -Wextra -O3 -I.
+LDFLAGS := -lm
 
-TARGET := geodetic_test
-SOURCES := geodetic.cpp test_geodetic.cpp
-OBJECTS := $(SOURCES:.cpp=.o)
+# Цели для тестов
+GEODETIC_TARGET := geodetic_test
+ATMOSPHERE_TARGET := atmosphere_test
 
-all: $(TARGET)
+# Основная цель - собирает все тесты
+all: $(GEODETIC_TARGET) $(ATMOSPHERE_TARGET)
 
-$(TARGET): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ $^
+# Сборка геодезического теста
+$(GEODETIC_TARGET): geodetic.cpp test_geodetic.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.cpp geodetic.hpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# Сборка теста атмосферы
+$(ATMOSPHERE_TARGET): test_atmosphere.cpp
+	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+# Очистка
 clean:
-	rm -f $(TARGET) $(OBJECTS)
+	rm -f $(GEODETIC_TARGET) $(ATMOSPHERE_TARGET) *.o
 
-test: $(TARGET)
-	./$(TARGET)
+# Запуск всех тестов
+test: $(GEODETIC_TARGET) $(ATMOSPHERE_TARGET)
+	@echo "============================================="
+	@echo " RUNNING GEODETIC TESTS"
+	@echo "============================================="
+	@./$(GEODETIC_TARGET)
+	@echo
+	@echo "============================================="
+	@echo " RUNNING ATMOSPHERE TESTS"
+	@echo "============================================="
+	@./$(ATMOSPHERE_TARGET)
 
 .PHONY: all clean test
